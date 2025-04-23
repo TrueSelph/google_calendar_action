@@ -6,7 +6,6 @@ import:jac from jivas.agent.core.agent { Agent }
 
 walker google_calendar_interact :interact_graph_walker: {
     # called via a webhook whenever there are verification requests or inbound messages
-    # when activated, it will trigger the facebook interact action to communicate
 
     # set up logger
     static has logger:Logger = logging.getLogger(__name__);
