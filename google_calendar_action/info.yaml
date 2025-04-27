@@ -2,7 +2,7 @@ package:
   name: jivas/google_calendar_action
   author: V75 Inc.
   architype: GoogleCalendarAction
-  version: 0.0.1
+  version: 0.0.2
   meta:
     title: Google Calendar Action
     description: Manages events and schedules on the specified Google Calendar.
