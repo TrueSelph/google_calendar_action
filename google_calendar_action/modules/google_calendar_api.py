@@ -168,7 +168,7 @@ class GoogleCalendarAPI:
 
             return response
         except HttpError as error:
-            GoogleCalendarAPI.logger.error(f"Error: {error}")
+            GoogleCalendarAPI.logger.error(f"Google Calendar API: Error {error}")
             return {}
 
     @staticmethod
@@ -193,5 +193,7 @@ class GoogleCalendarAPI:
             return id == resource_id
 
         except AttributeError as e:
-            GoogleCalendarAPI.logger.error(f"Invalid request object: {e}")
+            GoogleCalendarAPI.logger.error(
+                f"Google Calendar API: Invalid request object: {e}"
+            )
             return False

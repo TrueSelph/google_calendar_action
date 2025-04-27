@@ -2,17 +2,18 @@ import:py os;
 import:py pytz;
 import:py logging;
 import:py traceback;
-import:py from logging {Logger}
+import:py from typing { Union }
+import:py from logging { Logger }
 import:py from datetime { datetime }
 import:py from jvserve.lib.agent_interface { AgentInterface }
 import:py from .modules.google_calendar_api {GoogleCalendarAPI}
 import:jac from jivas.agent.action.action { Action }
 
 node GoogleCalendarAction :Action: {
+
     has timezone:str = "";
     has scopes:list = ["https://www.googleapis.com/auth/calendar"];
     has calendar_id:str = "";
-
     has base_url:str = "";
     has webhook_url:str = "";
     has resource_id:str = "";
@@ -52,14 +53,21 @@ node GoogleCalendarAction :Action: {
             # generate webhook key
             webhook_key = AgentInterface.encrypt_webhook_key(agent_id=agent_id, module_root=module_root, walker="google_calendar_interact");
 
-            if(self.enabled and self.base_url and webhook_key) {
+            credentials = self.get_credentials();
+
+            if(self.enabled and self.base_url and webhook_key and credentials) {
                 # complete the full webhook url
                 self.webhook_url = f'{self.base_url}/webhook/{webhook_key}';
 
-                credentials = self.get_credentials();
                 result = GoogleCalendarAPI.update_webhook(credentials, self.webhook_url, self.calendar_id, 2);
-                self.resource_id = result["resourceId"];
-                self.expiration = int(result["before_expiration"]);
+
+                if not result {
+                    return False;
+                }
+
+                self.resource_id = result.get("resourceId");
+                self.expiration = int(result.get("before_expiration"));
+
                 return True;
             } else {
                 self.logger.error('unable to generate webhook url for Google Calendar, missing required parameters');
@@ -86,6 +94,24 @@ node GoogleCalendarAction :Action: {
 
     can get_credentials() -> dict {
 
+        if( not
+            (self.scopes and
+            self.calendar_id and
+            self.info_type and
+            self.project_id and
+            self.private_key_id and
+            self.private_key and
+            self.client_email and
+            self.client_id and
+            self.auth_uri and
+            self.token_uri and
+            self.auth_provider_x509_cert_url and
+            self.client_x509_cert_url and
+            self.universe_domain)
+        ) {
+            return {};
+        }
+
         credentials = {
             "credentials": {
                 "type": self.info_type,
@@ -103,6 +129,7 @@ node GoogleCalendarAction :Action: {
             "scopes": self.scopes,
             "calendar_id": self.calendar_id
         };
+
         return credentials;
     }
 
@@ -141,33 +168,17 @@ node GoogleCalendarAction :Action: {
         return result;
     }
 
-    can healthcheck() -> bool {
-        try {
-            if(
-                self.timezone and
-                self.scopes and
-                self.calendar_id and
-                self.base_url and
-                self.webhook_url and
-                self.info_type and
-                self.project_id and
-                self.private_key_id and
-                self.private_key and
-                self.client_email and
-                self.client_id and
-                self.auth_uri and
-                self.token_uri and
-                self.auth_provider_x509_cert_url and
-                self.client_x509_cert_url and
-                self.universe_domain
-            ) {
-                return True;
-            }
-            return False;
-        } except Exception as e {
-            self.logger.error(f"An exception occurred in {self.label}:\n{traceback.format_exc()}\n");
-            return False;
+    can healthcheck() -> Union[bool, dict] {
+
+        if not self.get_credentials() {
+            return {
+                "status": False,
+                "message": "Missing API credentials. Check configuration.",
+                "severity": "error"
+            };
         }
+
+        return True;
     }
 
 }
