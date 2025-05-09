@@ -21,7 +21,7 @@ walker google_calendar_interact :interact_graph_walker: {
 
         # when the webhook triggered update last_modified_timestamp in GoogleCalendarAction
         if( action_node:=(here.get_actions().get(action_label='GoogleCalendarAction')) ) {
-            action_node.validate_request(self.headers);
+            action_node.validate_request(self.headers, action_node);
         }
     }
 }

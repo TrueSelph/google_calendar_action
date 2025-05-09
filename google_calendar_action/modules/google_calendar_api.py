@@ -5,11 +5,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
+from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
-
-NAME = "calendar"
-VERSION = "v3"
 
 
 class GoogleCalendarAPI:
@@ -17,141 +14,180 @@ class GoogleCalendarAPI:
 
     logger = logging.getLogger(__name__)
 
-    @staticmethod
-    def create_event(creds: dict, event_info: dict) -> dict:
-        """Creates an event in the Google Calendar."""
-        credentials = service_account.Credentials.from_service_account_info(
-            creds["credentials"], scopes=creds["scopes"]
-        )
-        service = build(NAME, VERSION, credentials=credentials, cache_discovery=False)
-        event = (
-            service.events()
-            .insert(calendarId=creds["calendar_id"], body=event_info)
-            .execute()
-        )
-        return event
+    def __init__(
+        self,
+        info_type: str,
+        scopes: list,
+        calendar_id: str,
+        project_id: str,
+        private_key_id: str,
+        private_key: str,
+        client_email: str,
+        client_id: str,
+        auth_uri: str,
+        token_uri: str,
+        auth_provider_x509_cert_url: str,
+        client_x509_cert_url: str,
+        universe_domain: str,
+        google_api_client_name: str,
+        google_api_client_version: str,
+        resource_id: str,
+    ) -> None:
+        """
+        Initializes the GoogleSheetAPI object with credentials.
 
-    @staticmethod
+        :param credentials: Dictionary containing Google API credentials.
+        """
+
+        self.credentials = {
+            "type": info_type,
+            "project_id": project_id,
+            "private_key_id": private_key_id,
+            "private_key": private_key,
+            "client_email": client_email,
+            "client_id": client_id,
+            "auth_uri": auth_uri,
+            "token_uri": token_uri,
+            "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
+            "client_x509_cert_url": client_x509_cert_url,
+            "universe_domain": universe_domain,
+        }
+
+        self.scopes = scopes
+        self.calendar_id = calendar_id
+        self.google_api_client_name = google_api_client_name
+        self.google_api_client_version = google_api_client_version
+        self.resource_id = resource_id
+
+    def build_services(self) -> Resource:
+        """Builds the Google Calendar API service using the provided credentials."""
+        credentials = service_account.Credentials.from_service_account_info(
+            self.credentials, scopes=self.scopes
+        )
+        return build(
+            self.google_api_client_name,
+            self.google_api_client_version,
+            credentials=credentials,
+        )
+
+    def create_event(self, event_info: dict) -> dict:
+        """Creates an event in the Google Calendar."""
+
+        try:
+            service = self.build_services()
+            event = (
+                service.events()
+                .insert(calendarId=self.calendar_id, body=event_info)
+                .execute()
+            )
+            return event
+        except Exception as e:
+            self.logger.error(f"Google Calendar API: Error creating event: {e}")
+            return {}
+
     def list_events(
-        creds: dict,
+        self,
         max_results: int = 2500,
         single_events: bool = True,
         order_by: str = "startTime",
     ) -> list:
         """Lists events from the Google Calendar."""
-        credentials = service_account.Credentials.from_service_account_info(
-            creds["credentials"], scopes=creds["scopes"]
-        )
-        service = build(NAME, VERSION, credentials=credentials)
-        now = datetime.now(timezone.utc).isoformat()
-        if single_events:
-            events_result = (
-                service.events()
-                .list(
-                    calendarId=creds["calendar_id"],
-                    timeMin=now,
-                    maxResults=max_results,
-                    singleEvents=single_events,
-                    orderBy=order_by,
-                )
-                .execute()
-            )
-        else:
-            events_result = (
-                service.events()
-                .list(
-                    calendarId=creds["calendar_id"],
-                    timeMin=now,
-                    maxResults=max_results,
-                    singleEvents=single_events,
-                    orderBy=order_by,
-                )
-                .execute()
-            )
 
-        events = events_result.get("items", [])
-        return events
-
-    @staticmethod
-    def get_event(creds: dict, event_id: str) -> dict:
-        """Gets an event from the Google Calendar."""
-        credentials = service_account.Credentials.from_service_account_info(
-            creds["credentials"], scopes=creds["scopes"]
-        )
-        service = build(NAME, VERSION, credentials=credentials)
-        event = (
-            service.events()
-            .get(calendarId=creds["calendar_id"], eventId=event_id)
-            .execute()
-        )
-        return event
-
-    @staticmethod
-    def delete_event(creds: dict, event_id: str) -> bool:
-        """Deletes an event from the Google Calendar."""
         try:
-            credentials = service_account.Credentials.from_service_account_info(
-                creds["credentials"], scopes=creds["scopes"]
+
+            service = self.build_services()
+            now = datetime.now(timezone.utc).isoformat()
+            events_result = (
+                service.events()
+                .list(
+                    calendarId=self.calendar_id,
+                    timeMin=now,
+                    maxResults=max_results,
+                    singleEvents=single_events,
+                    orderBy=order_by,
+                )
+                .execute()
             )
-            service = build(NAME, VERSION, credentials=credentials)
+            events = events_result.get("items", [])
+            return events
+        except Exception as e:
+            self.logger.error(f"Google Calendar API: Error listing events: {e}")
+            return []
+
+    def get_event(self, event_id: str) -> dict:
+        """Gets an event from the Google Calendar."""
+        try:
+            service = self.build_services()
+            event = (
+                service.events()
+                .get(calendarId=self.calendar_id, eventId=event_id)
+                .execute()
+            )
+            return event
+        except Exception as e:
+            self.logger.error(
+                f"Google Calendar API: Error getting event {event_id}: {e}"
+            )
+            return {}
+
+    def delete_event(self, event_id: str) -> bool:
+        """Deletes an event from the Google Calendar."""
+
+        try:
+            service = self.build_services()
             service.events().delete(
-                calendarId=creds["calendar_id"], eventId=event_id
+                calendarId=self.calendar_id, eventId=event_id
             ).execute()
             return True
-        except Exception:
+        except Exception as e:
+            self.logger.error(
+                f"Google Calendar API: Error deleting event {event_id}: {e}"
+            )
             return False
 
-    @staticmethod
-    def update_event(creds: dict, event_id: str, updated_event_info: dict) -> dict:
+    def update_event(self, event_id: str, updated_event_info: dict) -> dict:
         """Updates an event in the Google Calendar."""
-        credentials = service_account.Credentials.from_service_account_info(
-            creds["credentials"], scopes=creds["scopes"]
-        )
-        service = build(NAME, VERSION, credentials=credentials)
-        updated_event = (
-            service.events()
-            .update(
-                calendarId=creds["calendar_id"],
-                eventId=event_id,
-                body=updated_event_info,
-            )
-            .execute()
-        )
-        return updated_event
 
-    @staticmethod
-    def update_webhook(
-        creds: dict, webhook_url: str, calendar_id: str, days_before: int = 1
-    ) -> dict:
+        try:
+            service = self.build_services()
+            updated_event = (
+                service.events()
+                .update(
+                    calendarId=self.calendar_id,
+                    eventId=event_id,
+                    body=updated_event_info,
+                )
+                .execute()
+            )
+            return updated_event
+        except Exception as e:
+            self.logger.error(
+                f"Google Calendar API: Error updating event {event_id}: {e}"
+            )
+            return {}
+
+    def update_webhook(self, webhook_url: str, days_before: int = 1) -> dict:
         """
         Updates the webhook for a Google Calendar.
 
         Parameters:
-        - creds: Credentials for Google API.
         - webhook_url: The URL to receive notifications.
         - calendar_id: The ID of the calendar to be watched.
         - channel_id: A unique ID for the channel(agent_id).
-        - resource_id: The identifier for the watched resource.
 
         Returns:
         dict: A dictionary containing details of the channel, such as kind, id, resourceId, resourceUri, and expiration.
         """
 
+        service = self.build_services()
         channel_id = uuid.uuid4().hex
-
-        credentials = service_account.Credentials.from_service_account_info(
-            creds["credentials"], scopes=creds["scopes"]
-        )
-
-        service = build(NAME, VERSION, credentials=credentials)
-
         channel = {"id": channel_id, "type": "web_hook", "address": webhook_url}
 
         try:
             response = (
                 service.events()
                 .watch(
-                    calendarId=calendar_id,  # Or use your specific calendar ID
+                    calendarId=self.calendar_id,
                     body=channel,
                 )
                 .execute()
@@ -168,17 +204,15 @@ class GoogleCalendarAPI:
 
             return response
         except HttpError as error:
-            GoogleCalendarAPI.logger.error(f"Google Calendar API: Error {error}")
+            self.logger.error(f"Google Calendar API: Error {error}")
             return {}
 
-    @staticmethod
-    def validate_request(request: dict, resource_id: str) -> bool:
+    def validate_request(self, request: dict) -> bool:
         """
         Validates that the request object matches the expected resource_id.
 
         Args:
         request: dict, A dictionary containing the request headers.
-        resource_id: str, The resource_id to match against.
 
         Returns:
         bool: True if the request object matches the expected resource_id, False otherwise.
@@ -190,10 +224,8 @@ class GoogleCalendarAPI:
             if not id:
                 return False
 
-            return id == resource_id
+            return id == self.resource_id
 
-        except AttributeError as e:
-            GoogleCalendarAPI.logger.error(
-                f"Google Calendar API: Invalid request object: {e}"
-            )
+        except Exception as e:
+            self.logger.error(f"Google Calendar API: Invalid request object: {e}")
             return False
