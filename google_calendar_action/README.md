@@ -13,7 +13,7 @@ This action is designed to interface with the Google Calendar API allowing calen
 - **Name:** `jivas/google_calendar_action`
 - **Author:** [V75 Inc.](https://v75inc.com/)
 - **Architype:** `GoogleCalendarAction`
-- **Version:** 0.0.1
+- **Version:** 0.0.3
 
 ## Meta Information
 
@@ -29,7 +29,7 @@ This action is designed to interface with the Google Calendar API allowing calen
 ## Dependencies
 
 - **Jivas:** ^2.0.0
-- **oauth2client:** 4.1.3
+- **oauth2client:** 3.0.0
 - **google-api-python-client:** 2.97.0
 - **google-auth:** 2.32.0
 

@@ -49,17 +49,14 @@ node GoogleCalendarAction :Action: {
 
     can healthcheck() -> Union[bool, dict] {
         try {
-            # self.logger.warning(f"Google Calendar API healthcheck: 0");
-            # sss= self.api().list_events(single_events=False);
-            # self.logger.warning(f"Google Calendar API healthcheck: {sss}");
-
-            # if not self.api().list_events(single_events=False) {
-            #     return {
-            #         "status": False,
-            #         "message": "Missing API credentials. Check configuration.",
-            #         "severity": "error"
-            #     };
-            # }
+            events = self.api().list_events(max_results = 1, single_events=False);
+            if "error" in events {
+                return {
+                    "status": False,
+                    "message": f"{events['error']}",
+                    "severity": "error"
+                };
+            }
 
             return True;
 
@@ -105,7 +102,12 @@ node GoogleCalendarAction :Action: {
         # generate webhook key
         webhook_key = AgentInterface.encrypt_webhook_key(agent_id=agent_id, module_root=module_root, walker="google_calendar_interact");
 
-        if(self.enabled and self.base_url and webhook_key) {
+        if(not self.enabled) {
+            return False;
+        }
+
+
+        if(self.base_url and webhook_key) {
             # complete the full webhook url
             self.webhook_url = f'{self.base_url}/webhook/{webhook_key}';
 

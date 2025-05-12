@@ -3,3 +3,6 @@
 
 ## 0.0.2
 - Updated healthcheck
+
+## 0.0.3
+- Refactor API

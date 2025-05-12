@@ -3,6 +3,7 @@
 import logging
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Optional, Union
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import Resource, build
@@ -38,10 +39,10 @@ class GoogleCalendarAPI:
 
         :param credentials: Dictionary containing Google API credentials.
         """
-
         self.credentials = {
             "type": info_type,
             "project_id": project_id,
+            "calendar_id": calendar_id,
             "private_key_id": private_key_id,
             "private_key": private_key,
             "client_email": client_email,
@@ -83,17 +84,19 @@ class GoogleCalendarAPI:
             return event
         except Exception as e:
             self.logger.error(f"Google Calendar API: Error creating event: {e}")
-            return {}
+            return {"ok": False, "error": str(e)}
 
     def list_events(
         self,
         max_results: int = 2500,
         single_events: bool = True,
-        order_by: str = "startTime",
-    ) -> list:
+        order_by: Optional[str] = "startTime",
+    ) -> Union[list, dict]:
         """Lists events from the Google Calendar."""
 
         try:
+            if single_events is False and order_by == "startTime":
+                order_by = None
 
             service = self.build_services()
             now = datetime.now(timezone.utc).isoformat()
@@ -112,7 +115,7 @@ class GoogleCalendarAPI:
             return events
         except Exception as e:
             self.logger.error(f"Google Calendar API: Error listing events: {e}")
-            return []
+            return {"ok": False, "error": str(e)}
 
     def get_event(self, event_id: str) -> dict:
         """Gets an event from the Google Calendar."""
@@ -128,9 +131,9 @@ class GoogleCalendarAPI:
             self.logger.error(
                 f"Google Calendar API: Error getting event {event_id}: {e}"
             )
-            return {}
+            return {"ok": False, "error": str(e)}
 
-    def delete_event(self, event_id: str) -> bool:
+    def delete_event(self, event_id: str) -> Union[bool, dict]:
         """Deletes an event from the Google Calendar."""
 
         try:
@@ -143,7 +146,7 @@ class GoogleCalendarAPI:
             self.logger.error(
                 f"Google Calendar API: Error deleting event {event_id}: {e}"
             )
-            return False
+            return {"ok": False, "error": str(e)}
 
     def update_event(self, event_id: str, updated_event_info: dict) -> dict:
         """Updates an event in the Google Calendar."""
@@ -164,7 +167,7 @@ class GoogleCalendarAPI:
             self.logger.error(
                 f"Google Calendar API: Error updating event {event_id}: {e}"
             )
-            return {}
+            return {"ok": False, "error": str(e)}
 
     def update_webhook(self, webhook_url: str, days_before: int = 1) -> dict:
         """
@@ -204,10 +207,10 @@ class GoogleCalendarAPI:
 
             return response
         except HttpError as error:
-            self.logger.error(f"Google Calendar API: Error {error}")
-            return {}
+            self.logger.error(f"Google Calendar API: Error updating webhook: {error}")
+            return {"ok": False, "error": str(error)}
 
-    def validate_request(self, request: dict) -> bool:
+    def validate_request(self, request: dict) -> Union[bool, dict]:
         """
         Validates that the request object matches the expected resource_id.
 
@@ -228,4 +231,4 @@ class GoogleCalendarAPI:
 
         except Exception as e:
             self.logger.error(f"Google Calendar API: Invalid request object: {e}")
-            return False
+            return {"ok": False, "error": str(e)}
