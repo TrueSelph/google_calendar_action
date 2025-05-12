@@ -5,4 +5,4 @@
 - Updated healthcheck
 
 ## 0.0.3
-- Refactor API
+- Refactored the python module to accept the params through the class.
