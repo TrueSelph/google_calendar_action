@@ -3,3 +3,6 @@
 
 ## 0.0.2
 - Updated healthcheck
+
+## 0.0.3
+- Refactored the python module to accept the params through the class.

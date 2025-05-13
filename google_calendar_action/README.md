@@ -6,40 +6,61 @@
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/TrueSelph/google_calendar_action)
 ![GitHub](https://img.shields.io/github/license/TrueSelph/google_calendar_action)
 
-This action is designed to interface with the Google Calendar API allowing calendar data to be retrieved and calendar entries to be created. It provides the means to respond to Google Calendar updates via webhook. This action depends on version 2.0.0 of the Jivas library and requires several Python packages for its functionality, including `oauth2client`, `google-api-python-client`, and `google-auth`.
+JIVAS action wrapper for Google Calendar API. This action provides seamless integration with Google Calendar services using the [Google Calendar API](https://developers.google.com/calendar/api). As a core action, it simplifies calendar management and event synchronization. The package is a singleton and requires the Jivas library version ^2.0.0.
 
 ## Package Information
-
 - **Name:** `jivas/google_calendar_action`
 - **Author:** [V75 Inc.](https://v75inc.com/)
 - **Architype:** `GoogleCalendarAction`
-- **Version:** 0.0.1
 
 ## Meta Information
-
 - **Title:** Google Calendar Action
-- **Description:** Manages events and schedules on the specified Google Calendar.
 - **Group:** core
 - **Type:** action
 
 ## Configuration
-
 - **Singleton:** true
 
 ## Dependencies
-
-- **Jivas:** ^2.0.0
-- **oauth2client:** 4.1.3
+- **Jivas:** `~2.0.0-aplha.40`
+- **oauth2client:** 3.0.0
 - **google-api-python-client:** 2.97.0
 - **google-auth:** 2.32.0
 
 ---
 
-### Best Practices
+## Google Sheets API Guide
 
-- Ensure your Google API credentials are valid and properly secured.
-- Test calendar operations in a sandbox or testing environment to avoid accidental data changes.
-- Review and manage Google API quotas to avoid service interruptions.
+### Step 1: Create a Service Account
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project or select an existing one.
+3. Navigate to **APIs & Services > Credentials**.
+4. Click **Create Credentials > Service Account**.
+5. Fill in the required details and click **Done**.
+
+### Step 2: Enable Google Sheets API
+
+1. In the **APIs & Services > Library**, search for **Google Calendar API**.
+2. Click **Enable** to activate the API for your project.
+
+### Step 3: Download Service Account Key
+
+1. In the **Credentials** section, locate your service account and click it.
+2. Click **keys > add key > Create new key**.
+4. Select **JSON** and create.
+
+### Step 4: Share Calendar with Service Account email
+
+1. Open your Google Calendar.
+2. Under My Calendar, click **Settings and Share**.
+3. Go to **Shared with** and add the service account email (found in the JSON key file) with **See all events** permissions.
+
+---
+
+### Best Practices
+- Validate your API keys and webhook URLs before deployment.
+- Test webhook registration in a staging environment before production use.
 
 ---
 

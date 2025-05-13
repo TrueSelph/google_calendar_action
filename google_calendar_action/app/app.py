@@ -17,8 +17,12 @@ def render(router: StreamlitRouter, agent_id: str, action_id: str, info: dict) -
 
     # add app header controls
     (model_key, module_root) = app_header(agent_id, action_id, info)
-    # add app main controls
-    app_controls(agent_id, action_id)
+
+    with st.expander("Google Calendar Configuration", expanded=False):
+        # Add main app controls
+        app_controls(agent_id, action_id)
+        # Add update button to apply changes
+        app_update_action(agent_id, action_id)
 
     # Add Register Webhook section
     with st.expander("Register Webhook", expanded=True):
@@ -37,6 +41,3 @@ def render(router: StreamlitRouter, agent_id: str, action_id: str, info: dict) -
                 st.success("Webhook registered successfully!")
             else:
                 st.error("Failed to register webhook. Please try again.")
-
-    # Add update button to apply changes
-    app_update_action(agent_id, action_id)
