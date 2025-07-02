@@ -1,15 +1,15 @@
-import:py os;
-import:py pytz;
-import:py logging;
-import:py traceback;
-import:py from typing { Union }
-import:py from logging { Logger }
-import:py from datetime { datetime }
-import:py from jvserve.lib.agent_interface { AgentInterface }
-import:py from .modules.google_calendar_api {GoogleCalendarAPI}
-import:jac from jivas.agent.action.action { Action }
+import os;
+import pytz;
+import logging;
+import traceback;
+import from typing { Union }
+import from logging { Logger }
+import from datetime { datetime }
+import from jvserve.lib.agent_interface { AgentInterface }
+import from .modules.google_calendar_api {GoogleCalendarAPI}
+import from jivas.agent.action.action { Action }
 
-node GoogleCalendarAction :Action: {
+node GoogleCalendarAction(Action) {
 
     has timezone:str = "";
     has scopes:list = ["https://www.googleapis.com/auth/calendar"];
@@ -34,11 +34,11 @@ node GoogleCalendarAction :Action: {
     has google_api_client_version:str = "v3";
 
 
-    can on_enable() {
+    def on_enable() {
         self.enabled = self.on_register();
     }
 
-    can on_register() -> bool {
+    def on_register() -> bool {
         if (not self.base_url) {
             # default to jivas base url in environment
             self.base_url = os.environ.get('JIVAS_BASE_URL');
@@ -47,7 +47,7 @@ node GoogleCalendarAction :Action: {
         self.register_session();
     }
 
-    can healthcheck() -> Union[bool, dict] {
+    def healthcheck() -> Union[bool, dict] {
         try {
             events = self.api().list_events(max_results = 1, single_events=False);
             if "error" in events {
@@ -68,7 +68,7 @@ node GoogleCalendarAction :Action: {
 
     # --------------- GoogleCalendarAPI ----------------
 
-    can api() -> GoogleCalendarAPI {
+    def api() -> GoogleCalendarAPI {
         # load the api instance
 
         return GoogleCalendarAPI(
@@ -92,7 +92,7 @@ node GoogleCalendarAction :Action: {
 
     }
 
-    can register_session() -> dict {
+    def register_session() -> dict {
         # setup procedure for webhook registration on api
 
         result = {};
@@ -127,7 +127,7 @@ node GoogleCalendarAction :Action: {
         return False;
     }
 
-    can validate_request(headers:dict, action_node:Action) -> bool {
+    def validate_request(headers:dict, action_node:Action) -> bool {
         current_timestamp = int((datetime.now(pytz.timezone(action_node.timezone))).timestamp());
 
         valid_request = action_node.api().validate_request(headers);
