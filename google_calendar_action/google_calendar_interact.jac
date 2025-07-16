@@ -1,10 +1,10 @@
 import logging;
 import from logging { Logger }
-import from jivas.agent.action.interact_graph_walker { interact_graph_walker }
+import from jivas.agent.action.agent_graph_walker { agent_graph_walker }
 import from jivas.agent.core.agent { Agent }
 
 
-walker google_calendar_interact(interact_graph_walker) {
+walker google_calendar_interact(agent_graph_walker) {
     # called via a webhook whenever there are verification requests or inbound messages
     # when activated, it will trigger the facebook interact action to communicate
 
