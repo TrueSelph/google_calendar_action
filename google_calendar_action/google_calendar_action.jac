@@ -5,8 +5,8 @@ import traceback;
 import from typing { Union }
 import from logging { Logger }
 import from datetime { datetime }
-import from .modules.google_calendar_api { GoogleCalendarAPI }
 import from jivas.agent.action.action { Action }
+import from .modules.google_calendar_api { GoogleCalendarAPI }
 import from .google_calendar_interact { google_calendar_interact }
 
 
@@ -33,6 +33,7 @@ node GoogleCalendarAction(Action) {
     has universe_domain:str = "googleapis.com";
     has google_api_client_name:str = "calendar";
     has google_api_client_version:str = "v3";
+    has webhook_token_expiry_days:int = 60;
 
 
     def on_enable() {
