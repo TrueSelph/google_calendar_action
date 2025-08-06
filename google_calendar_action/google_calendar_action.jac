@@ -5,9 +5,10 @@ import traceback;
 import from typing { Union }
 import from logging { Logger }
 import from datetime { datetime }
-import from jvserve.lib.agent_interface { encrypt_webhook_key_exec }
-import from .modules.google_calendar_api {GoogleCalendarAPI}
+import from .modules.google_calendar_api { GoogleCalendarAPI }
 import from jivas.agent.action.action { Action }
+import from .google_calendar_interact { google_calendar_interact }
+
 
 node GoogleCalendarAction(Action) {
 
@@ -97,20 +98,23 @@ node GoogleCalendarAction(Action) {
 
         result = {};
 
+        base_url = self.base_url;
         agent_id = self.get_agent().id;
-        module_root = self.get_module_root();
+
         # generate webhook key
-        webhook_key = encrypt_webhook_key_exec(agent_id=agent_id, module_root=module_root, walker="google_calendar_interact");
+        webhook_walker = google_calendar_interact(agent_id=agent_id);
+        self.webhook_url = webhook_walker.get_callback_url(
+            base_url=self.base_url,
+            agent_id=agent_id,
+            expiration = self.webhook_token_expiry_days
+        );
 
         if(not self.enabled) {
             return False;
         }
 
 
-        if(self.base_url and webhook_key) {
-            # complete the full webhook url
-            self.webhook_url = f'{self.base_url}/action/webhook/{webhook_key}';
-
+        if(self.webhook_url) {
             result = self.api().update_webhook(self.webhook_url, 2);
 
             if not result {
