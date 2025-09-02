@@ -6,7 +6,7 @@
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/TrueSelph/google_calendar_action)
 ![GitHub](https://img.shields.io/github/license/TrueSelph/google_calendar_action)
 
-JIVAS action wrapper for Google Calendar API. This action provides seamless integration with Google Calendar services using the [Google Calendar API](https://developers.google.com/calendar/api). As a core action, it simplifies calendar management and event synchronization. The package is a singleton and requires the Jivas library version ^2.0.0.
+JIVAS action wrapper for Google Calendar API. This action provides seamless integration with Google Calendar services using the [Google Calendar API](https://developers.google.com/calendar/api). As a core action, it simplifies calendar management and event synchronization. The package is a singleton and requires the Jivas library version ^2.1.0.
 
 ## Package Information
 - **Name:** `jivas/google_calendar_action`
@@ -22,7 +22,7 @@ JIVAS action wrapper for Google Calendar API. This action provides seamless inte
 - **Singleton:** true
 
 ## Dependencies
-- **Jivas:** `~2.0.0-aplha.40`
+- **Jivas:** `~2.1.0`
 - **oauth2client:** 3.0.0
 - **google-api-python-client:** 2.97.0
 - **google-auth:** 2.32.0

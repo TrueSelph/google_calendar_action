@@ -1,3 +1,5 @@
-include:jac google_calendar_action;
-include:jac google_calendar_interact;
-include:jac register_google_calendar_webhook;
+import from actions.jivas.google_calendar_action {
+    google_calendar_action,
+    google_calendar_interact,
+    register_google_calendar_webhook
+}
